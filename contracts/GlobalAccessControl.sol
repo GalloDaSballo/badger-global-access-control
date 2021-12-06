@@ -27,24 +27,33 @@ contract GlobalAccessControl is Initializable, AccessControlUpgradeable, Pausabl
     bytes32 public constant BLACKLIST_MANAGER_ROLE = keccak256("BLACKLIST_MANAGER_ROLE");
     bytes32 public constant BLACKLISTED_ROLE = keccak256("BLACKLISTED_ROLE");
 
+    
+    // === Immutable Variables* ===
+    // * They can't be changed, but they are not immutable as this is an upgradeable contract
+
     // Dev multisig, is the governance of most contracts
     // Should be able to do anything
-    address public constant DEV_MULTISIG = 0xB65cef03b9B89f99517643226d76e286ee999e77;
+    address public DEV_MULTISIG;
+    
     // Techops is a faster less trusted multisig to execute operations urgently
     // Can pause but not unpause
     // Can blacklist
-    address public constant TECHOPS_MULTISIG = 0x86cbD0ce0c087b482782c181dA8d191De18C8275;
+    address public TECHOPS_MULTISIG;
 
     // Can only pause
-    address public constant WAR_ROOM_ACL = 0x6615e67b8B6b6375D38A0A3f937cd8c1a1e96386;
+    address public WAR_ROOM_ACL;
 
-    function initialize() external initializer {
-        
+    function initialize(address _devMultisig, address _techopsMultisig, address _warRoomAcl) external initializer {
         /**
             Admin manages roles for pausers, unpausers, and blacklist managers
             Blacklist Manager manages blacklist
         */
 
+        // Set up the view variables
+        DEV_MULTISIG = _devMultisig;
+        TECHOPS_MULTISIG = _techopsMultisig;
+        WAR_ROOM_ACL = _warRoomAcl;
+        
         // No need as DEFAULT_ADMIN is already roleAdmin
         // _setRoleAdmin(PAUSER_ROLE, DEFAULT_ADMIN_ROLE);
         // _setRoleAdmin(UNPAUSER_ROLE, DEFAULT_ADMIN_ROLE);
@@ -52,16 +61,16 @@ contract GlobalAccessControl is Initializable, AccessControlUpgradeable, Pausabl
 
         _setRoleAdmin(BLACKLISTED_ROLE, BLACKLIST_MANAGER_ROLE);
 
-        _setupRole(DEFAULT_ADMIN_ROLE, DEV_MULTISIG);
+        _setupRole(DEFAULT_ADMIN_ROLE, _devMultisig);
 
-        _setupRole(BLACKLIST_MANAGER_ROLE, DEV_MULTISIG);
-        _setupRole(BLACKLIST_MANAGER_ROLE, TECHOPS_MULTISIG);
+        _setupRole(BLACKLIST_MANAGER_ROLE, _devMultisig);
+        _setupRole(BLACKLIST_MANAGER_ROLE, _techopsMultisig);
 
-        _setupRole(PAUSER_ROLE, WAR_ROOM_ACL);
-        _setupRole(PAUSER_ROLE, TECHOPS_MULTISIG);
-        _setupRole(PAUSER_ROLE, DEV_MULTISIG);
-
-        _setupRole(UNPAUSER_ROLE, DEV_MULTISIG);
+        _setupRole(PAUSER_ROLE, _devMultisig);
+        _setupRole(PAUSER_ROLE, _techopsMultisig);
+        _setupRole(PAUSER_ROLE, _warRoomAcl);
+        
+        _setupRole(UNPAUSER_ROLE, _devMultisig);
     }
 
     function pause() external {

@@ -27,7 +27,6 @@ def test_setup_initialized_roles(deployed, admin, tech_ops, war_room, rando, hac
   ## Verify dev multi is unpauser
   ## Verify dev multi is blacklister
   ## Verify dev multi is not blacklisted
-
   assert deployed.hasRole(deployed.DEFAULT_ADMIN_ROLE(), admin) == True
   assert deployed.hasRole(deployed.PAUSER_ROLE(), admin) == True
   assert deployed.hasRole(deployed.UNPAUSER_ROLE(), admin) == True
