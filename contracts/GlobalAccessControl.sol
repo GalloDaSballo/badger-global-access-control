@@ -27,6 +27,9 @@ contract GlobalAccessControl is Initializable, AccessControlUpgradeable, Pausabl
     bytes32 public constant BLACKLIST_MANAGER_ROLE = keccak256("BLACKLIST_MANAGER_ROLE");
     bytes32 public constant BLACKLISTED_ROLE = keccak256("BLACKLISTED_ROLE");
 
+    // Should the function transferFrom be enabled
+    // NOTE: This is enforced at the Sett level, the contract just allows the toggling of the bool
+    bool public transferFromEnabled; // Set to true in initialize
     
     // === Immutable Variables* ===
     // * They can't be changed, but they are not immutable as this is an upgradeable contract
@@ -71,6 +74,8 @@ contract GlobalAccessControl is Initializable, AccessControlUpgradeable, Pausabl
         _setupRole(PAUSER_ROLE, _warRoomAcl);
         
         _setupRole(UNPAUSER_ROLE, _devMultisig);
+
+        transferFromEnabled = true;
     }
 
     function pause() external {
@@ -81,6 +86,16 @@ contract GlobalAccessControl is Initializable, AccessControlUpgradeable, Pausabl
     function unpause() external {
         require(hasRole(UNPAUSER_ROLE, msg.sender), "UNPAUSER_ROLE");
         _unpause();
+    }
+
+    function enableTransferFrom() external {
+        require(hasRole(UNPAUSER_ROLE, msg.sender), "PAUSER_ROLE");
+        transferFromEnabled = true;
+    }
+
+    function disableTransferFrom() external {
+        require(hasRole(PAUSER_ROLE, msg.sender), "PAUSER_ROLE");
+        transferFromEnabled = false;
     }
 
     function isBlacklisted(address account) external view returns (bool) {
