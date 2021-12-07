@@ -142,9 +142,9 @@ def test_blacklist(deployed, admin, tech_ops, war_room, hacker, rando):
 
 
 def test_enable_disable_transferFrom(deployed, admin, tech_ops, war_room, hacker, rando):
-  # Verify setting transferFromEnabled is active initially and can be changed with same roles as pausing
+  # Verify setting transferFromDisabled is active initially and can be changed with same roles as pausing
 
-  assert deployed.transferFromEnabled() == True
+  assert deployed.transferFromDisabled() == False
 
   ## Rando cannot disable
   with brownie.reverts():
@@ -153,7 +153,7 @@ def test_enable_disable_transferFrom(deployed, admin, tech_ops, war_room, hacker
   ## Admin and can disableTransferFrom
   deployed.disableTransferFrom({"from": admin})
 
-  assert deployed.transferFromEnabled() == False
+  assert deployed.transferFromDisabled() == True
 
   ## Rando cannot re-enable
   with brownie.reverts():
@@ -162,10 +162,16 @@ def test_enable_disable_transferFrom(deployed, admin, tech_ops, war_room, hacker
   ## Pauser / tech_ops cannot re-enable
   with brownie.reverts():
     deployed.enableTransferFrom({"from": tech_ops})
-  
-  assert deployed.transferFromEnabled() == False
+
+  ## Nothign as changed, because of reverts
+  assert deployed.transferFromDisabled() == True
 
   ## Governance can enable
   deployed.enableTransferFrom({"from": admin})
 
-  assert deployed.transferFromEnabled() == True
+  assert deployed.transferFromDisabled() == False
+
+  ## And tech_ops can disable
+  deployed.disableTransferFrom({"from": tech_ops})
+
+  assert deployed.transferFromDisabled() == True
