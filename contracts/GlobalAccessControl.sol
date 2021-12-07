@@ -75,7 +75,8 @@ contract GlobalAccessControl is Initializable, AccessControlUpgradeable, Pausabl
         
         _setupRole(UNPAUSER_ROLE, _devMultisig);
 
-        transferFromDisabled = false; // same as paused, but just for transferFrom
+        transferFromDisabled = true; // Start with transferFrom disabled
+        _pause(); //Start paused
     }
 
     function pause() external {

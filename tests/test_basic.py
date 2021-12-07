@@ -83,6 +83,9 @@ def test_pause_unpause_permissions_work_with_roles(deployed, admin, tech_ops, ra
     with brownie.reverts():
       deployed.pause({"from": rando})
 
+    ## Admin can unpause
+    deployed.unpause({"from": admin})
+
     ## If tech_ops can pause
     assert deployed.hasRole(deployed.PAUSER_ROLE(), tech_ops) == True
 
@@ -144,7 +147,10 @@ def test_blacklist(deployed, admin, tech_ops, war_room, hacker, rando):
 def test_enable_disable_transferFrom(deployed, admin, tech_ops, war_room, hacker, rando):
   # Verify setting transferFromDisabled is active initially and can be changed with same roles as pausing
 
-  assert deployed.transferFromDisabled() == False
+  assert deployed.transferFromDisabled() == True
+
+  ## Governance can enable
+  deployed.enableTransferFrom({"from": admin})
 
   ## Rando cannot disable
   with brownie.reverts():
